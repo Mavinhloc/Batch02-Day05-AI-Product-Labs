@@ -29,7 +29,7 @@ def test_extract_text_txt():
 
 def test_extract_text_txt_unicode():
     f = MockFile("notes.txt", "Xin chào thế giới".encode("utf-8"))
-    assert "Xin chào" in extract_text(f)
+    assert extract_text(f) == "Xin chào thế giới"
 
 
 def test_extract_text_pdf():
@@ -52,6 +52,14 @@ def test_extract_text_pdf_multiple_pages():
         result = extract_text(f)
     assert "Page 1" in result
     assert "Page 2" in result
+
+
+def test_extract_text_pdf_none_page():
+    page = MagicMock()
+    page.extract_text.return_value = None
+    with patch("src.tutor.PdfReader") as MockPdfReader:
+        MockPdfReader.return_value.pages = [page]
+        assert extract_text(MockFile("doc.pdf", b"")) == ""
 
 
 def test_extract_text_docx():
