@@ -47,3 +47,23 @@ def build_prompt(doc_context: str, history: list, question: str) -> tuple:
     lines.append(f"Học viên: {question}")
 
     return system, "\n".join(lines)
+
+
+def _get_llm():
+    return ChatOpenAI(
+        model=os.getenv("CUSTOM_LLM_MODEL", "deepseek-v4-flash"),
+        openai_api_key=os.getenv("CUSTOM_LLM_KEY"),
+        openai_api_base=os.getenv("CUSTOM_LLM_URL"),
+        temperature=0.3,
+    )
+
+
+def _call_llm(system_prompt: str, user_prompt: str) -> str:
+    llm = _get_llm()
+    messages = [SystemMessage(content=system_prompt), HumanMessage(content=user_prompt)]
+    return llm.invoke(messages).content
+
+
+def chat(doc_context: str, history: list, question: str) -> str:
+    system, user_prompt = build_prompt(doc_context, history, question)
+    return _call_llm(system, user_prompt)
