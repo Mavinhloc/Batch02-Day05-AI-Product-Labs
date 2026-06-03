@@ -90,10 +90,14 @@ if "digest" in st.session_state:
                     st.session_state["digest_json_str"],
                     correction
                 )
-                st.session_state["digest"] = updated
-                st.session_state["digest_json_str"] = json.dumps(
-                    updated, ensure_ascii=False, indent=2
-                )
-                st.rerun()
+                if updated.get("parse_error"):
+                    st.warning("⚠️ Không parse được kết quả cập nhật — giữ nguyên digest cũ.")
+                    st.text(updated.get("raw", ""))
+                else:
+                    st.session_state["digest"] = updated
+                    st.session_state["digest_json_str"] = json.dumps(
+                        updated, ensure_ascii=False, indent=2
+                    )
+                    st.rerun()
         else:
             st.warning("Vui lòng nhập thông tin bổ sung.")
