@@ -18,3 +18,22 @@ SYSTEM_PROMPT = (
     "Nếu câu hỏi mơ hồ → hỏi lại: \"Bạn đang bị stuck ở điểm nào cụ thể?\" trước khi giải thích.\n"
     "Trả lời bằng tiếng Việt. Dùng code block khi có code."
 )
+
+
+def extract_text(file) -> str:
+    name = file.name.lower()
+    if name.endswith(".pdf"):
+        reader = PdfReader(file)
+        text = "\n".join(page.extract_text() or "" for page in reader.pages)
+    elif name.endswith(".docx"):
+        doc = Document(file)
+        text = "\n".join(p.text for p in doc.paragraphs)
+    elif name.endswith(".txt"):
+        text = file.read().decode("utf-8", errors="replace")
+    else:
+        raise ValueError(f"Unsupported file type: {file.name}")
+    return text[:MAX_DOC_CHARS]
+
+
+def build_prompt(doc_context="", history=None, question=""):
+    pass
