@@ -83,3 +83,38 @@ def test_extract_text_truncates_long_file():
     f = MockFile("notes.txt", long_text.encode("utf-8"))
     result = extract_text(f)
     assert len(result) == MAX_DOC_CHARS
+
+
+# --- build_prompt ---
+
+def test_build_prompt_includes_question():
+    _, user = build_prompt("", [], "Giải thích LangChain")
+    assert "Giải thích LangChain" in user
+
+
+def test_build_prompt_includes_doc_context_in_system():
+    system, _ = build_prompt("Đây là tài liệu buổi học", [], "hỏi gì đó")
+    assert "Đây là tài liệu buổi học" in system
+
+
+def test_build_prompt_no_doc_context_excludes_section():
+    system, _ = build_prompt("", [], "hỏi gì đó")
+    assert "Tài liệu buổi học" not in system
+
+
+def test_build_prompt_includes_history():
+    history = [
+        {"role": "user", "content": "Agents là gì?"},
+        {"role": "assistant", "content": "Agents là các thực thể tự trị..."},
+    ]
+    _, user = build_prompt("", history, "Câu tiếp theo")
+    assert "Agents là gì?" in user
+    assert "Agents là các thực thể tự trị" in user
+    assert "Câu tiếp theo" in user
+
+
+def test_build_prompt_returns_tuple_of_two_strings():
+    result = build_prompt("", [], "câu hỏi")
+    assert isinstance(result, tuple)
+    assert len(result) == 2
+    assert all(isinstance(s, str) for s in result)

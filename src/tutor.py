@@ -35,5 +35,15 @@ def extract_text(file) -> str:
     return text[:MAX_DOC_CHARS]
 
 
-def build_prompt(doc_context="", history=None, question=""):
-    pass
+def build_prompt(doc_context: str, history: list, question: str) -> tuple:
+    system = SYSTEM_PROMPT
+    if doc_context:
+        system += f"\n\nTài liệu buổi học:\n{doc_context}"
+
+    lines = []
+    for msg in history:
+        role = "Học viên" if msg["role"] == "user" else "AI Tutor"
+        lines.append(f"{role}: {msg['content']}")
+    lines.append(f"Học viên: {question}")
+
+    return system, "\n".join(lines)
