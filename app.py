@@ -1,103 +1,62 @@
-import json
 import streamlit as st
-from src.digest import generate_digest, correct_digest
+from src.tutor import extract_text, chat
 
-st.set_page_config(page_title="Session Digest Bot", layout="wide")
-st.title("📚 Session Digest Bot")
-st.caption("Gom thông tin từ Email / Discord / Web thành một bản tóm tắt duy nhất.")
+st.set_page_config(page_title="AI Tutor — AI Thực Chiến", layout="wide")
 
-# --- Input Form ---
-with st.form("digest_form"):
-    date = st.text_input(
-        "Buổi học / ngày *",
-        placeholder="ví dụ: 2026-06-03 hoặc Day 05"
+# --- Sidebar ---
+with st.sidebar:
+    st.header("📚 Tài liệu buổi học")
+    st.caption("Tuỳ chọn — upload để AI có context bài học.")
+
+    uploaded = st.file_uploader(
+        "PDF / DOCX / TXT",
+        type=["pdf", "docx", "txt"],
+        label_visibility="collapsed",
     )
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        email = st.text_area("📧 Email", height=200, placeholder="Paste nội dung email...")
-    with col2:
-        discord = st.text_area("💬 Discord", height=200, placeholder="Paste tin nhắn Discord...")
-    with col3:
-        web = st.text_area("🌐 Web / LMS", height=200, placeholder="Paste nội dung từ web trường...")
-    submitted = st.form_submit_button("Generate Digest ✨", type="primary")
 
-if submitted:
-    if not date.strip():
-        st.error("Vui lòng nhập ngày buổi học.")
-    elif not any([email.strip(), discord.strip(), web.strip()]):
-        st.error("Vui lòng paste nội dung từ ít nhất một kênh.")
+    if uploaded and uploaded.name != st.session_state.get("doc_name"):
+        try:
+            doc_text = extract_text(uploaded)
+            st.session_state["doc_context"] = doc_text
+            st.session_state["doc_name"] = uploaded.name
+            st.session_state["chat_history"] = []
+            if len(doc_text) >= 50_000:
+                st.info("File lớn — chỉ đọc được 50,000 ký tự đầu.")
+        except ValueError as e:
+            st.error(str(e))
+
+    if "doc_name" in st.session_state:
+        st.success(f"✅ {st.session_state['doc_name']}")
+        st.caption(f"{len(st.session_state.get('doc_context', ''))} ký tự đã đọc")
     else:
-        with st.spinner("Đang tạo digest..."):
-            result = generate_digest(date, email, discord, web)
-            st.session_state["digest"] = result
-            st.session_state["digest_json_str"] = json.dumps(
-                result, ensure_ascii=False, indent=2
-            )
+        st.info("Chưa có tài liệu — bạn vẫn có thể hỏi bất kỳ điều gì.")
 
-# --- Results ---
-if "digest" in st.session_state:
-    digest = st.session_state["digest"]
+# --- Main Chat ---
+st.title("💬 AI Tutor")
+st.caption("Hỏi về bất kỳ phần nào bạn chưa hiểu trong khoá AI thực chiến.")
 
-    st.divider()
+if "chat_history" not in st.session_state:
+    st.session_state["chat_history"] = []
 
-    if digest.get("parse_error"):
-        st.warning("⚠️ Không parse được — xem kết quả thô bên dưới.")
-        st.text(digest.get("raw", ""))
-    else:
-        col_left, col_right = st.columns([2, 1])
+for msg in st.session_state["chat_history"]:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
 
-        with col_left:
-            st.subheader("✅ Key Concepts")
-            concepts = digest.get("key_concepts", [])
-            if concepts:
-                for concept in concepts:
-                    st.markdown(f"- {concept}")
-            else:
-                st.markdown("_Không tìm thấy key concepts._")
+if question := st.chat_input("Bạn đang stuck ở đâu?"):
+    st.session_state["chat_history"].append({"role": "user", "content": question})
+    with st.chat_message("user"):
+        st.markdown(question)
 
-            st.subheader("📋 Action Items")
-            items = digest.get("action_items", [])
-            if items:
-                for item in items:
-                    task = item.get("task", "")
-                    deadline = item.get("deadline", "")
-                    label = f"**{task}** — `{deadline}`" if deadline else f"**{task}**"
-                    st.markdown(f"- {label}")
-            else:
-                st.markdown("_Không có action items._")
-
-        with col_right:
-            flags = digest.get("flags", [])
-            if flags:
-                st.subheader("⚠️ Cần làm rõ")
-                for flag in flags:
-                    st.warning(flag)
-            else:
-                st.success("Không có thông tin mơ hồ.")
-
-    # --- Correction ---
-    st.divider()
-    st.subheader("💬 Thêm thông tin còn thiếu")
-    correction = st.text_area(
-        "Nhập thông tin bổ sung...",
-        height=80,
-        placeholder="ví dụ: Deadline nộp bài là 23:59 ngày 5/6"
-    )
-    if st.button("Cập nhật Digest 🔄"):
-        if correction.strip():
-            with st.spinner("Đang cập nhật..."):
-                updated = correct_digest(
-                    st.session_state["digest_json_str"],
-                    correction
+    with st.chat_message("assistant"):
+        with st.spinner(""):
+            try:
+                answer = chat(
+                    st.session_state.get("doc_context", ""),
+                    st.session_state["chat_history"][:-1],
+                    question,
                 )
-                if updated.get("parse_error"):
-                    st.warning("⚠️ Không parse được kết quả cập nhật — giữ nguyên digest cũ.")
-                    st.text(updated.get("raw", ""))
-                else:
-                    st.session_state["digest"] = updated
-                    st.session_state["digest_json_str"] = json.dumps(
-                        updated, ensure_ascii=False, indent=2
-                    )
-                    st.rerun()
-        else:
-            st.warning("Vui lòng nhập thông tin bổ sung.")
+            except Exception as e:
+                answer = f"⚠️ Lỗi khi gọi AI: {e}"
+        st.markdown(answer)
+
+    st.session_state["chat_history"].append({"role": "assistant", "content": answer})
