@@ -1,101 +1,8 @@
-# Workshop — Mổ App AI Thật
+# App Teardown — Mavinhloc (V-App / V-AI)
 
-**Thời gian:** 35-45 phút  
-**Hình thức:** cá nhân trước, chia sẻ theo nhóm sau  
-**Output:** finding note + sketch `as-is / to-be`
+## 1. Sản phẩm: V-App — V-AI
 
-Mục tiêu không phải chấm "UI đẹp hay xấu". Mục tiêu là dùng sản phẩm thật như một bài needfinding: tìm chỗ product gãy trong workflow thật, rồi viết finding đó thành quyết định product.
-
-## 1. Chọn một sản phẩm để dùng thử
-
-| Sản phẩm | AI feature | Cách truy cập |
-|---|---|---|
-| MoMo — Moni | Trợ thủ tài chính, phân tích chi tiêu, chatbot | App MoMo |
-| Vietnam Airlines — NEO | Chatbot hỗ trợ vé, hành lý, khiếu nại | Website/Zalo VNA |
-| V-App — V-AI | Trợ lý voice/text, gợi ý theo ngữ cảnh | App V-App |
-
-## 2. Dùng thử: promise vs reality
-
-Ghi nhanh:
-
-- Product hứa gì?
-- User nào được hứa sẽ được giúp?
-- Bạn kỳ vọng AI làm được task nào?
-- Khi dùng thật, điểm gãy xuất hiện ở đâu?
-
-Evidence cần có:
-
-- screenshot,
-- quote từ app/web/review,
-- prompt/input đã thử,
-- hành vi quan sát được.
-
-## 3. Vẽ 4 paths
-
-| Path | Câu hỏi cần trả lời |
-|---|---|
-| Happy | Khi AI đúng và tự tin, user thấy gì? |
-| Low-confidence | Khi AI không chắc, hệ thống có hỏi lại, show options hoặc chuyển người không? |
-| Failure | Khi AI sai, user biết bằng cách nào và sửa thế nào? |
-| Correction | Khi user sửa, correction có được lưu/log/học lại không hay biến mất? |
-
-## 4. Viết finding thành quyết định
-
-Không viết:
-
-```text
-Bot ngu, trả lời sai.
-```
-
-Viết:
-
-```text
-Khi user [trigger],
-AI/product [failure],
-hậu quả là [impact].
-Lỗi thuộc layer [promise / intent / data-tool / safety / UX recovery].
-Nên sửa bằng [requirement / UX / fallback / human role / test case].
-```
-
-Ví dụ:
-
-```text
-Khi user hỏi "chi tiêu linh tinh là gì?",
-AI hiểu như keyword thay vì nhận ra intent mơ hồ,
-hậu quả là user không biết sửa phân loại chi tiêu ở đâu.
-Lỗi thuộc Intent + UX Recovery.
-Nên sửa bằng low-confidence path: hỏi lại tiêu chí hoặc đưa 2-3 nhóm giao dịch để chọn.
-```
-
-## 5. Sketch as-is / to-be
-
-Vẽ 2 cột:
-
-- **As-is:** flow hiện tại, đánh dấu điểm gãy.
-- **To-be:** flow đề xuất, đánh dấu path đã sửa.
-
-Không cần đẹp. Cần nhìn vào là hiểu:
-
-- user làm gì,
-- AI làm gì,
-- lúc AI không chắc thì sao,
-- lúc AI sai user recover thế nào.
-
-## 6. Tự kiểm trước khi nộp
-
-- [x] Có ít nhất 1 screenshot hoặc observation cụ thể.
-- [x] Có đủ 4 paths hoặc nói rõ path nào chưa có trong product.
-- [x] Finding được viết thành product decision, không chỉ là nhận xét.
-- [x] Sketch có as-is và to-be.
-- [x] Có một câu nói rõ finding này sẽ đổi gì trong SPEC.
-
----
-
-## Kết quả — Mavinhloc (V-App / V-AI)
-
-### 1. Sản phẩm: V-App — V-AI
-
-### 2. Promise vs Reality
+## 2. Promise vs Reality
 
 **Product hứa:** Trợ lý AI voice/text, hỗ trợ mọi tác vụ theo ngữ cảnh người dùng.
 
@@ -110,7 +17,7 @@ Không cần đẹp. Cần nhìn vào là hiểu:
 - Screenshot `c7b7754a`: Input "Hãy lập trình game xo bằng html cho tôi" → output là tutorial 3 mục HTML/CSS/JS với nguồn ngoài, không có code
 - Screenshot `01d1a16a`: V-AI từ chối câu hỏi về cờ bạc → safety filter hoạt động đúng (contrast: safety đúng, intent detection sai)
 
-### 3. Bốn Paths
+## 3. Bốn Paths
 
 | Path | Quan sát thực tế |
 |---|---|
@@ -119,7 +26,7 @@ Không cần đẹp. Cần nhìn vào là hiểu:
 | **Failure** | User yêu cầu viết code rõ ràng → V-AI phân loại sai thành "cần hướng dẫn", từ chối thực thi, trả tutorial |
 | **Correction** | User đổi cách hỏi (vẫn cùng intent) → V-AI vẫn giữ tutorial mode, không adapt — correction không có tác dụng |
 
-### 4. Finding → Product Decision
+## 4. Finding → Product Decision
 
 ```
 Khi user yêu cầu "hãy lập trình game xo bằng html cho tôi" (động từ hành động rõ: "lập trình"),
@@ -133,7 +40,7 @@ Nên sửa bằng:
 - Nếu có policy cấm viết code hoàn chỉnh → nói rõ lý do ngay, không giả vờ hướng dẫn thay thế.
 ```
 
-### 5. Sketch As-is / To-be
+## 5. Sketch As-is / To-be
 
 ```
 AS-IS (flow hiện tại):
@@ -169,6 +76,10 @@ V-AI: detect động từ "lập trình" + object "game xo" = execution intent r
 ────────────────────────────────────────────────────
 ```
 
-### Finding → SPEC Impact
+## 6. Tự kiểm
 
-Finding này thay đổi SPEC ở chỗ: **bất kỳ AI assistant nào** trong product của nhóm cần phân biệt rõ hai mode — *explain* và *execute* — và mặc định chọn *execute* khi user dùng động từ hành động rõ. Nếu có giới hạn, phải nói thẳng lý do thay vì redirect sang tutorial.
+- [x] Có ít nhất 1 screenshot hoặc observation cụ thể.
+- [x] Có đủ 4 paths hoặc nói rõ path nào chưa có trong product.
+- [x] Finding được viết thành product decision, không chỉ là nhận xét.
+- [x] Sketch có as-is và to-be.
+- [x] Finding này sẽ đổi gì trong SPEC: bất kỳ AI assistant nào trong product của nhóm cần phân biệt rõ hai mode — *explain* và *execute* — và mặc định chọn *execute* khi user dùng động từ hành động rõ. Nếu có giới hạn, phải nói thẳng lý do thay vì redirect sang tutorial.
