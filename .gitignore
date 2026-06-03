@@ -3,3 +3,10 @@
 Thumbs.db
 .idea/
 .vscode/
+
+# Environment variables
+.env
+
+# Python
+__pycache__/
+.pytest_cache/
