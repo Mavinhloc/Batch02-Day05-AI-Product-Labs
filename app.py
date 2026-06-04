@@ -157,6 +157,21 @@ if st.session_state.get("flashcards"):
         cards = parse_flashcards(st.session_state["flashcards"])
         ver = st.session_state.get("fc_version", 0)
         if cards:
+            # Controls row
+            flipped_count = sum(st.session_state.get(f"flip_{i}_v{ver}", False) for i in range(len(cards)))
+            ctrl1, ctrl2, ctrl3 = st.columns([2, 1, 1])
+            ctrl1.caption(f"**{flipped_count}/{len(cards)}** thẻ đã lật")
+            if ctrl2.button("Lật tất cả", use_container_width=True, key=f"flip_all_v{ver}"):
+                for i in range(len(cards)):
+                    st.session_state[f"flip_{i}_v{ver}"] = True
+                st.rerun()
+            if ctrl3.button("Reset", use_container_width=True, key=f"reset_all_v{ver}"):
+                for i in range(len(cards)):
+                    st.session_state[f"flip_{i}_v{ver}"] = False
+                st.rerun()
+
+            st.markdown("---")
+
             cols_per_row = 3
             for row in range(0, len(cards), cols_per_row):
                 cols = st.columns(min(cols_per_row, len(cards) - row))
@@ -166,15 +181,34 @@ if st.session_state.get("flashcards"):
                     is_flipped = st.session_state.get(flip_key, False)
                     with col:
                         if not is_flipped:
-                            st.info(f"**{card['front']}**")
-                            if st.button("🔄 Lật thẻ", key=f"flip_btn_{idx}_v{ver}",
-                                         use_container_width=True):
+                            st.markdown(f"""
+<div style="background:linear-gradient(145deg,#1e1508,#251c0a);
+border:2px solid #f5a623;border-radius:16px;padding:28px 18px 20px;
+min-height:180px;display:flex;flex-direction:column;align-items:center;
+justify-content:center;text-align:center;margin-bottom:4px;
+box-shadow:0 4px 20px rgba(245,166,35,.2);">
+  <div style="font-size:9px;letter-spacing:2.5px;text-transform:uppercase;
+  color:#ffc24b;margin-bottom:14px;font-family:monospace;opacity:.9;">
+  THUẬT NGỮ &nbsp;·&nbsp; {idx+1}/{len(cards)}</div>
+  <div style="font-size:20px;font-weight:700;color:#fff3d4;line-height:1.35;">{card['front']}</div>
+  <div style="margin-top:16px;font-size:10px;color:#f5a623;letter-spacing:1px;opacity:.7;">↓ lật để xem giải thích</div>
+</div>""", unsafe_allow_html=True)
+                            if st.button("🔄 Lật thẻ", key=f"flip_btn_{idx}_v{ver}", use_container_width=True):
                                 st.session_state[flip_key] = True
                                 st.rerun()
                         else:
-                            st.success(card["back"])
-                            if st.button("↩️ Lật lại", key=f"flip_btn_{idx}_v{ver}",
-                                         use_container_width=True):
+                            st.markdown(f"""
+<div style="background:linear-gradient(145deg,#0d1f12,#0f2416);
+border:2px solid #22c55e;border-radius:16px;padding:28px 18px 20px;
+min-height:180px;display:flex;flex-direction:column;align-items:center;
+justify-content:center;text-align:center;margin-bottom:4px;
+box-shadow:0 4px 20px rgba(34,197,94,.18);">
+  <div style="font-size:9px;letter-spacing:2.5px;text-transform:uppercase;
+  color:#4ade80;margin-bottom:12px;font-family:monospace;opacity:.9;">
+  GIẢI THÍCH &nbsp;·&nbsp; {idx+1}/{len(cards)}</div>
+  <div style="font-size:14px;color:#dcfce7;line-height:1.7;">{card['back']}</div>
+</div>""", unsafe_allow_html=True)
+                            if st.button("↩️ Lật lại", key=f"flip_btn_{idx}_v{ver}", use_container_width=True):
                                 st.session_state[flip_key] = False
                                 st.rerun()
         else:
