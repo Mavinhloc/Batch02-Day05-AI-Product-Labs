@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Tutor — Demo Slides</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f0f13;
+    color: #e8e8f0;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* Slide container */
+  .deck { width: 100vw; height: 100vh; position: relative; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 80px;
+    opacity: 0;
+    transform: translateX(60px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+  }
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+  }
+  .slide.exit {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+
+  /* Navigation */
+  .nav {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 100;
+  }
+  .nav button {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #e8e8f0;
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+  }
+  .nav button:hover { background: rgba(255,255,255,0.15); }
+  .nav button:disabled { opacity: 0.3; cursor: default; }
+  .progress {
+    font-size: 13px;
+    color: rgba(255,255,255,0.4);
+    min-width: 60px;
+    text-align: center;
+  }
+
+  /* Dots */
+  .dots {
+    position: fixed;
+    right: 28px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 100;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .dot.active { background: #7c6cfc; transform: scale(1.4); }
+
+  /* Typography */
+  .tag {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #7c6cfc;
+    margin-bottom: 16px;
+  }
+  h1 { font-size: 56px; font-weight: 700; line-height: 1.15; }
+  h2 { font-size: 38px; font-weight: 700; line-height: 1.2; margin-bottom: 8px; }
+  h3 { font-size: 22px; font-weight: 600; color: rgba(255,255,255,0.7); margin-bottom: 32px; }
+  p  { font-size: 18px; line-height: 1.7; color: rgba(255,255,255,0.75); }
+
+  /* Accent */
+  .accent { color: #7c6cfc; }
+  .accent-green { color: #4ade80; }
+  .accent-orange { color: #fb923c; }
+  .accent-blue { color: #60a5fa; }
+
+  /* Cards */
+  .cards {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    margin-top: 16px;
+  }
+  .card {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 28px 24px;
+  }
+  .card-icon { font-size: 32px; margin-bottom: 12px; }
+  .card h4 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+  .card p  { font-size: 15px; color: rgba(255,255,255,0.6); line-height: 1.6; }
+
+  /* Pain point quote */
+  .quote {
+    background: rgba(251,146,60,0.08);
+    border-left: 3px solid #fb923c;
+    border-radius: 0 12px 12px 0;
+    padding: 20px 28px;
+    margin: 20px 0;
+    font-size: 19px;
+    font-style: italic;
+    color: rgba(255,255,255,0.85);
+    max-width: 700px;
+  }
+
+  /* Flow / steps */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+    margin-top: 24px;
+  }
+  .step {
+    flex: 1;
+    text-align: center;
+    background: rgba(124,108,252,0.1);
+    border: 1px solid rgba(124,108,252,0.25);
+    border-radius: 12px;
+    padding: 20px 16px;
+  }
+  .step-num {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #7c6cfc;
+    margin-bottom: 6px;
+  }
+  .step h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .step p  { font-size: 13px; color: rgba(255,255,255,0.5); }
+  .arrow {
+    color: rgba(255,255,255,0.2);
+    font-size: 20px;
+    padding: 0 8px;
+    flex-shrink: 0;
+  }
+
+  /* Code block */
+  .code {
+    background: #1a1a24;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 20px 24px;
+    font-family: 'Consolas', 'Fira Code', monospace;
+    font-size: 15px;
+    line-height: 1.7;
+    width: 100%;
+    margin-top: 20px;
+  }
+  .kw  { color: #c792ea; }
+  .str { color: #c3e88d; }
+  .fn  { color: #82aaff; }
+  .cm  { color: #546e7a; }
+
+  /* Two-col layout */
+  .two-col {
+    display: flex;
+    gap: 48px;
+    width: 100%;
+    align-items: flex-start;
+    margin-top: 8px;
+  }
+  .col { flex: 1; }
+
+  /* Badge list */
+  .badges { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .badge {
+    background: rgba(124,108,252,0.15);
+    border: 1px solid rgba(124,108,252,0.3);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  /* Criteria check */
+  .criteria { list-style: none; margin-top: 16px; }
+  .criteria li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-size: 17px;
+  }
+  .criteria li:last-child { border-bottom: none; }
+  .check { color: #4ade80; font-size: 20px; flex-shrink: 0; }
+
+  /* Demo path row */
+  .path-row {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    margin-top: 24px;
+  }
+  .path-card {
+    flex: 1;
+    border-radius: 14px;
+    padding: 22px 20px;
+    border: 1px solid transparent;
+  }
+  .path-card.green  { background: rgba(74,222,128,0.07); border-color: rgba(74,222,128,0.2); }
+  .path-card.blue   { background: rgba(96,165,250,0.07); border-color: rgba(96,165,250,0.2); }
+  .path-card.purple { background: rgba(124,108,252,0.07); border-color: rgba(124,108,252,0.25); }
+  .path-card .label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .path-card.green  .label { color: #4ade80; }
+  .path-card.blue   .label { color: #60a5fa; }
+  .path-card.purple .label { color: #a78bfa; }
+  .path-card h4 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .path-card p  { font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.55; }
+
+  /* Slide 1 — Cover */
+  #s1 { background: radial-gradient(ellipse at 30% 50%, rgba(124,108,252,0.12) 0%, transparent 60%),
+                    radial-gradient(ellipse at 80% 20%, rgba(96,165,250,0.08) 0%, transparent 50%),
+                    #0f0f13; }
+  #s1 h1 { text-align: center; }
+  #s1 .sub { font-size: 20px; color: rgba(255,255,255,0.45); margin-top: 16px; text-align: center; }
+  #s1 .meta { display: flex; gap: 32px; margin-top: 40px; }
+  #s1 .meta-item { text-align: center; }
+  #s1 .meta-item .val { font-size: 17px; font-weight: 600; color: #e8e8f0; }
+  #s1 .meta-item .lbl { font-size: 12px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- Slide 1: Cover -->
+  <div class="slide active" id="s1">
+    <div class="tag">AI Product Mini-Hackathon · Batch 02 · Day 05</div>
+    <h1>💬 AI Tutor</h1>
+    <h1><span class="accent">AI Thực Chiến</span></h1>
+    <p class="sub">Trợ lý học tập AI — hỏi ngay, hiểu ngay, không gián đoạn lớp</p>
+    <div class="meta">
+      <div class="meta-item"><div class="val">Streamlit</div><div class="lbl">UI Framework</div></div>
+      <div class="meta-item"><div class="val">Groq / LLaMA 3.3</div><div class="lbl">LLM Backend</div></div>
+      <div class="meta-item"><div class="val">LangChain</div><div class="lbl">LLM Plumbing</div></div>
+      <div class="meta-item"><div class="val">~1–2s</div><div class="lbl">Response time</div></div>
+    </div>
+  </div>
+
+  <!-- Slide 2: Problem -->
+  <div class="slide" id="s2">
+    <div class="tag">Problem</div>
+    <h2>Học viên <span class="accent-orange">không hiểu</span> nhưng <span class="accent-orange">không dám hỏi</span></h2>
+    <h3>Pain point thực tế trong lớp học live</h3>
+
+    <div class="quote">
+      "Hỏi to thì làm gián đoạn lớp. Hỏi ChatGPT thì không biết context bài hôm nay đang học gì."
+    </div>
+
+    <div class="cards" style="margin-top: 24px;">
+      <div class="card">
+        <div class="card-icon">😶</div>
+        <h4>Ngại ngắt lớp</h4>
+        <p>Học viên giữ câu hỏi lại, đến cuối buổi quên mất hoặc không còn cơ hội hỏi.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🤷</div>
+        <h4>ChatGPT thiếu context</h4>
+        <p>Không biết khoá học đang học gì, giải thích lạc đề hoặc quá chung chung.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📉</div>
+        <h4>Hiểu sai tích lũy</h4>
+        <p>Một khái niệm hiểu sai → các bài sau càng khó tiếp thu hơn.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 3: Solution -->
+  <div class="slide" id="s3">
+    <div class="tag">Solution</div>
+    <h2>AI Tutor biết <span class="accent">context</span> khoá học</h2>
+    <h3>Giải thích có cấu trúc · Adaptive · Upload tài liệu buổi học</h3>
+
+    <div class="flow" style="margin-top: 32px;">
+      <div class="step">
+        <div class="step-num">INPUT</div>
+        <h4>Câu hỏi tự do</h4>
+        <p>Gõ, paste, hoặc upload file PDF/DOCX/TXT</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="step">
+        <div class="step-num">AI PROCESS</div>
+        <h4>Context-aware</h4>
+        <p>Prompt có curriculum + tài liệu buổi học</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="step">
+        <div class="step-num">OUTPUT</div>
+        <h4>3-phần structured</h4>
+        <p>Giải thích · Code · Câu hỏi kiểm tra</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="step">
+        <div class="step-num">ADAPTIVE</div>
+        <h4>Câu hỏi mơ hồ</h4>
+        <p>AI hỏi lại để hiểu đúng vấn đề trước</p>
+      </div>
+    </div>
+
+    <div class="badges" style="margin-top: 28px;">
+      <span class="badge">Không cần RAG</span>
+      <span class="badge">Tiếng Việt</span>
+      <span class="badge">Có code block</span>
+      <span class="badge">Context từ file upload</span>
+      <span class="badge">Multi-turn chat</span>
+    </div>
+  </div>
+
+  <!-- Slide 4: Product Canvas -->
+  <div class="slide" id="s4">
+    <div class="tag">Product Canvas</div>
+    <h2>Toàn cảnh sản phẩm</h2>
+
+    <div class="two-col" style="margin-top: 28px;">
+      <div class="col">
+        <div class="card" style="margin-bottom: 16px;">
+          <div class="card-icon">👥</div>
+          <h4>User</h4>
+          <p>Học viên Batch 02 AI thực chiến — trong giờ học và khi review sau buổi học</p>
+        </div>
+        <div class="card" style="margin-bottom: 16px;">
+          <div class="card-icon">🎯</div>
+          <h4>Core Job-to-be-Done</h4>
+          <p>Hiểu ngay khái niệm đang học mà không phải đợi hoặc gián đoạn thầy</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">💡</div>
+          <h4>Differentiator</h4>
+          <p>Tutor biết curriculum (LLM, LangChain, Agents, RAG) + đọc được tài liệu buổi học</p>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card" style="margin-bottom: 16px;">
+          <div class="card-icon">⚡</div>
+          <h4>Key Features</h4>
+          <p style="color: rgba(255,255,255,0.75);">
+            📎 Upload tài liệu buổi học (PDF/DOCX/TXT)<br>
+            💬 Chat interface quen thuộc<br>
+            📐 Cấu trúc trả lời cố định: giải thích → code → kiểm tra<br>
+            🔄 Adaptive: hỏi lại khi câu hỏi mơ hồ
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🛠️</div>
+          <h4>Tech Stack</h4>
+          <p style="color: rgba(255,255,255,0.75);">
+            Streamlit · LangChain · Groq API<br>
+            LLaMA 3.3 70B · pypdf · python-docx
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 5: Demo paths -->
+  <div class="slide" id="s5">
+    <div class="tag">Demo — 3 Paths</div>
+    <h2>End-to-end flows đã test</h2>
+    <h3>Happy path · Error path · File context</h3>
+
+    <div class="path-row">
+      <div class="path-card green">
+        <div class="label">Happy Path</div>
+        <h4>Câu hỏi cụ thể</h4>
+        <p>
+          Input: <em>"LangChain là gì?"</em><br><br>
+          Output: 3-phần đầy đủ<br>
+          ① Giải thích ngắn gọn<br>
+          ② Code block syntax-highlighted<br>
+          ③ Câu hỏi kiểm tra hiểu
+        </p>
+      </div>
+      <div class="path-card blue">
+        <div class="label">Adaptive / Error Path</div>
+        <h4>Câu hỏi mơ hồ</h4>
+        <p>
+          Input: <em>"Tôi không hiểu"</em><br><br>
+          Output: AI hỏi lại<br>
+          <em>"Bạn đang bị stuck ở điểm nào cụ thể?"</em><br><br>
+          Không đoán mò — xác nhận trước khi giải thích
+        </p>
+      </div>
+      <div class="path-card purple">
+        <div class="label">File Upload Path</div>
+        <h4>Hỏi theo tài liệu</h4>
+        <p>
+          Upload file RAG.txt → Sidebar hiện<br>
+          ✅ <em>494 ký tự đã đọc</em><br><br>
+          Input: <em>"RAG khác gì fine-tuning?"</em><br>
+          Output: Dùng đúng context từ file
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 6: Architecture -->
+  <div class="slide" id="s6">
+    <div class="tag">Architecture</div>
+    <h2>Kiến trúc đơn giản, <span class="accent">không over-engineer</span></h2>
+
+    <div class="two-col" style="margin-top: 24px; gap: 40px;">
+      <div class="col">
+        <div class="code">
+<span class="cm"># Data flow</span>
+<br>
+<span class="fn">upload_file</span>()
+<br>
+  → <span class="fn">extract_text</span>(file)     <span class="cm"># PDF/DOCX/TXT</span>
+<br>
+  → truncate <span class="kw">if</span> &gt; 50k chars
+<br>
+  → session_state[<span class="str">"doc_context"</span>]
+<br><br>
+<span class="fn">chat_input</span>()
+<br>
+  → <span class="fn">build_prompt</span>(ctx, history, q)
+<br>
+  → <span class="fn">_call_llm</span>(system, user_prompt)
+<br>
+  → render <span class="kw">with</span> st.chat_message
+        </div>
+      </div>
+      <div class="col">
+        <div style="margin-bottom: 16px;">
+          <p style="font-size: 15px; color: rgba(255,255,255,0.5); margin-bottom: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; font-size: 11px;">File structure</p>
+          <div class="code" style="font-size: 14px; line-height: 1.8;">
+<span class="accent">app.py</span>          <span class="cm">← Streamlit UI</span>
+<br>
+<span class="accent">src/tutor.py</span>    <span class="cm">← core logic</span>
+<br>
+<span class="fn">  extract_text()</span>
+<br>
+<span class="fn">  build_prompt()</span>
+<br>
+<span class="fn">  chat()</span>
+<br>
+<span class="accent">tests/test_tutor.py</span> <span class="cm">← 13 unit tests</span>
+          </div>
+        </div>
+        <div class="badges">
+          <span class="badge accent-green" style="background: rgba(74,222,128,0.1); border-color: rgba(74,222,128,0.25); color: #4ade80;">Không dùng RAG</span>
+          <span class="badge accent-blue" style="background: rgba(96,165,250,0.1); border-color: rgba(96,165,250,0.25); color: #60a5fa;">Prompt injection</span>
+          <span class="badge" style="background: rgba(124,108,252,0.1); border-color: rgba(124,108,252,0.25); color: #a78bfa;">TDD</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 7: AI Integration -->
+  <div class="slide" id="s7">
+    <div class="tag">AI Integration</div>
+    <h2>AI chạy thật trong <span class="accent">mọi flow</span></h2>
+    <h3>Groq API · LLaMA 3.3 70B Versatile · ~1–2s response</h3>
+
+    <div class="cards" style="margin-top: 28px;">
+      <div class="card">
+        <div class="card-icon">🧠</div>
+        <h4>Curriculum-aware prompt</h4>
+        <p>System prompt hardcode domain (LLM, LangChain, Agents, RAG, Python) — AI không trả lời lạc đề.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📄</div>
+        <h4>Document-in-prompt</h4>
+        <p>Toàn bộ file tài liệu inject thẳng vào system prompt. Đơn giản, nhanh, không cần vector store.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔁</div>
+        <h4>Multi-turn memory</h4>
+        <p>Chat history được giữ trong session state và đưa vào mỗi prompt — AI nhớ context cuộc trò chuyện.</p>
+      </div>
+    </div>
+
+    <div class="code" style="margin-top: 24px; font-size: 14px;">
+<span class="cm"># System prompt — adaptive + structured output</span>
+<br>
+<span class="str">"Khi giải thích, luôn theo cấu trúc: 1. Giải thích ngắn gọn  2. Ví dụ code  3. Câu hỏi kiểm tra"</span>
+<br>
+<span class="str">"Nếu câu hỏi mơ hồ → hỏi lại: 'Bạn đang bị stuck ở điểm nào cụ thể?'"</span>
+    </div>
+  </div>
+
+  <!-- Slide 8: Evaluation -->
+  <div class="slide" id="s8">
+    <div class="tag">Tiêu chí đánh giá</div>
+    <h2>Đánh giá theo <span class="accent">5 tiêu chí</span></h2>
+
+    <ul class="criteria" style="width: 100%; max-width: 760px; margin-top: 20px;">
+      <li>
+        <span class="check">✅</span>
+        <div>
+          <strong>Presentation</strong> — Pain point rõ ràng: học viên không hiểu nhưng không có chỗ hỏi ngay trong lớp
+        </div>
+      </li>
+      <li>
+        <span class="check">✅</span>
+        <div>
+          <strong>Problem-Solution Fit</strong> — AI Tutor biết context khoá học + tài liệu buổi học → giải đúng vấn đề
+        </div>
+      </li>
+      <li>
+        <span class="check">✅</span>
+        <div>
+          <strong>Sản phẩm chạy được</strong> — 3 paths test xong: happy path, adaptive, file upload. ~1–2s/response
+        </div>
+      </li>
+      <li>
+        <span class="check">✅</span>
+        <div>
+          <strong>AI dùng đúng chỗ</strong> — AI xử lý toàn bộ logic giải thích, adaptive response, và đọc tài liệu
+        </div>
+      </li>
+      <li>
+        <span class="check">✅</span>
+        <div>
+          <strong>UI &amp; UX</strong> — Sidebar + Chat layout quen thuộc, sidebar upload, chat history render đúng
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Slide 9: Live Demo -->
+  <div class="slide" id="s9">
+    <div class="tag">Demo</div>
+    <h2 style="text-align: center;">🚀 Live Demo</h2>
+    <p style="text-align: center; font-size: 22px; margin-top: 20px; color: rgba(255,255,255,0.6);">
+      Chạy tại
+    </p>
+    <div style="margin-top: 20px; background: rgba(124,108,252,0.1); border: 1px solid rgba(124,108,252,0.3); border-radius: 16px; padding: 24px 48px; text-align: center;">
+      <span style="font-family: monospace; font-size: 28px; color: #a78bfa;">http://localhost:8501</span>
+    </div>
+    <div style="margin-top: 40px; display: flex; gap: 24px;">
+      <div style="text-align: center;">
+        <div style="font-size: 36px; margin-bottom: 8px;">1️⃣</div>
+        <div style="font-size: 15px; color: rgba(255,255,255,0.6);">Hỏi: "LangChain là gì?"</div>
+      </div>
+      <div style="text-align: center; color: rgba(255,255,255,0.2); font-size: 28px; padding-top: 18px;">→</div>
+      <div style="text-align: center;">
+        <div style="font-size: 36px; margin-bottom: 8px;">2️⃣</div>
+        <div style="font-size: 15px; color: rgba(255,255,255,0.6);">Hỏi: "Tôi không hiểu"</div>
+      </div>
+      <div style="text-align: center; color: rgba(255,255,255,0.2); font-size: 28px; padding-top: 18px;">→</div>
+      <div style="text-align: center;">
+        <div style="font-size: 36px; margin-bottom: 8px;">3️⃣</div>
+        <div style="font-size: 15px; color: rgba(255,255,255,0.6);">Upload file → hỏi về nội dung</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /deck -->
+
+<!-- Navigation -->
+<div class="nav">
+  <button id="btnPrev" onclick="go(-1)" disabled>← Trước</button>
+  <span class="progress" id="prog">1 / 9</span>
+  <button id="btnNext" onclick="go(1)">Tiếp →</button>
+</div>
+
+<!-- Dots -->
+<div class="dots" id="dots"></div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let cur = 0;
+
+  // Build dots
+  const dotsEl = document.getElementById('dots');
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    dotsEl.appendChild(d);
+  });
+
+  function goTo(n) {
+    slides[cur].classList.remove('active');
+    slides[cur].classList.add('exit');
+    setTimeout(() => slides[cur].classList.remove('exit'), 400);
+    cur = n;
+    slides[cur].classList.add('active');
+
+    document.querySelectorAll('.dot').forEach((d, i) =>
+      d.classList.toggle('active', i === cur));
+
+    document.getElementById('prog').textContent = `${cur + 1} / ${total}`;
+    document.getElementById('btnPrev').disabled = cur === 0;
+    document.getElementById('btnNext').disabled = cur === total - 1;
+  }
+
+  function go(dir) {
+    const n = cur + dir;
+    if (n >= 0 && n < total) goTo(n);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') go(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp') go(-1);
+  });
+</script>
+</body>
+</html>

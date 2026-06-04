@@ -1,63 +1,64 @@
-# Evidence Pack — Session Digest Bot
+# Evidence Pack — AI Tutor (In-Class Learning Assistant)
 
 ## 1. Nhóm và track
 
 **Tên nhóm:** Học chăm  
 **Track:** A - Learning OS: AI cho giáo dục, LMS, trợ lý học tập  
-**Product/app đã chọn:** Session Digest Bot — AI tổng hợp thông tin buổi học từ nhiều kênh  
-**Build slice đang nghĩ:** AI nhận paste content từ Email/Discord/Web → tóm tắt thành key concepts + action items + deadline flags trong 1 lượt
+**Product/app đã chọn:** AI Tutor — trợ lý học tập AI hỗ trợ học viên giải thích khái niệm ngay trong lớp  
+**Build slice đang nghĩ:** Học viên gõ câu hỏi (hoặc upload tài liệu buổi học) → AI giải thích có cấu trúc (giải thích ngắn + code + câu hỏi kiểm tra), adaptive khi câu hỏi mơ hồ
 
 ## 2. Self-use evidence
 
 | Observation | Screenshot/link | Path liên quan | Điều học được |
 |---|---|---|---|
-| Sau buổi lab, thông báo bài tập được gửi trên Discord, link tài liệu ở web trường, reminder qua email — 3 nơi khác nhau, không có chỗ tổng hợp. | Trải nghiệm trực tiếp trong lớp Batch 02 | Failure | Học viên phải mở 3 tab, đọc lại 3 lần mới chắc không miss gì. |
-| Hỏi bạn cùng lớp "hôm nay có bài nộp không?" — bạn không biết vì chỉ đọc Discord, bỏ qua email có deadline cụ thể. | Quan sát trực tiếp trong lớp | Failure | Thông tin bị phân mảnh → học viên miss deadline thật. |
-| Thử dùng AI tóm tắt một đoạn Discord: AI cho ra tóm tắt đúng nội dung nhưng không extract được deadline vì deadline nằm trong email khác. | Self-use test | Low-confidence | AI cần nhận input từ nhiều nguồn cùng lúc mới đủ context. |
+| Trong buổi lab Day 05, có khái niệm về LangChain chain không rõ — muốn hỏi nhưng thầy đang giảng phần khác. | Trải nghiệm trực tiếp Batch 02 | Failure | Học viên giữ câu hỏi lại, đến cuối buổi quên hoặc mất cơ hội hỏi. |
+| Thử hỏi ChatGPT về LangChain — AI giải thích đúng về mặt kỹ thuật nhưng không biết lớp đang dùng version nào, pattern nào. | Self-use test | Low-confidence | ChatGPT không có context khoá học → giải thích lạc đề so với nội dung thầy dạy. |
+| Bạn cùng nhóm hỏi: "Agents khác Chain thế nào?" sau buổi học — câu hỏi thật, không có chỗ hỏi phù hợp ngay lúc đó. | Quan sát trực tiếp trong lớp | Failure | Câu hỏi "nhỏ" không được giải đáp tích lũy thành confusion lớn. |
 
 ## 3. User / review / social evidence
 
 | Quote / review / observation | Nguồn | User là ai? | Pain/failure mode |
 |---|---|---|---|
-| "Mình miss deadline vì nghĩ thầy chỉ nhắc trên Discord, hoá ra email mới có ngày cụ thể." | Phỏng vấn nhanh 2 bạn cùng lớp | Học viên năm 1-2, 19-21 tuổi | Multi-channel → miss thông tin quan trọng |
-| "Sau buổi học online mình hay không biết mình cần làm gì tiếp theo, phải scroll lại toàn bộ chat mới nhớ." | Quan sát trực tiếp | Học viên học hybrid/online | Không có single source of truth sau buổi học |
-| "Thông báo lịch thi ở web trường, nhưng đổi phòng thì Discord, còn tài liệu thì email — mệt lắm." | Nói chuyện nhóm trước giờ học | Học viên đại học | Fragmented channels → cognitive overload |
+| "Mình không dám hỏi vì sợ làm mất thời gian của cả lớp, toàn đợi ra ngoài hỏi bạn." | Phỏng vấn nhanh 2 bạn cùng lớp | Học viên Batch 02, 19-22 tuổi | Rào cản xã hội → câu hỏi không được giải đáp ngay |
+| "ChatGPT giải thích đúng nhưng không biết đang học đến phần gì, giải thích từ đầu mà mình cần hiểu phần nâng cao hơn." | Quan sát trực tiếp khi bạn dùng ChatGPT trong giờ | Học viên đang học LangChain | AI không có context khoá học → giải thích không match trình độ / nội dung |
+| "Mình hay bị stuck ở code example — thầy show nhanh trên slide, không kịp hiểu." | Nói chuyện nhóm trước giờ học | Học viên học live session | Code examples trên slide không có giải thích đủ chậm |
 
 ## 4. Competitor / analog evidence
 
 | App / mô hình tham khảo | Họ xử lý task này thế nào? | Pattern học được | Có áp dụng trong 1 ngày không? |
 |---|---|---|---|
-| Notion AI / Summarize | Tóm tắt 1 document/page, không tổng hợp cross-channel | Single source summary | Yes — nhưng thiếu multi-channel merge |
-| Slack AI summarize | Tóm tắt thread/channel, nhưng chỉ trong Slack | Channel-scoped summary | Partial — cần mở rộng ra ngoài 1 app |
-| Google NotebookLM | Nhận nhiều nguồn → hỏi đáp, tóm tắt | Multi-source RAG | Partial — quá phức tạp cho 1 ngày, nhưng pattern đúng |
-| Manual note-taking | Học viên tự ghi chú sau mỗi buổi | Human digest | Yes — AI thay thế bước thủ công này |
+| ChatGPT / Claude | Trả lời câu hỏi tự do nhưng không có context khoá học cụ thể | Free-form Q&A | Yes — nhưng thiếu curriculum context + structured output |
+| Khan Academy AI Tutor | Giải thích từng bước, hỏi lại khi học sinh chưa hiểu | Adaptive + structured explanation | Partial — quá phức tạp cho 1 ngày, nhưng pattern đúng |
+| GitHub Copilot Chat | Giải thích code trong context của project | Context-aware explanation | Partial — chỉ cho code, không cho khái niệm học thuật |
+| Giáo viên dạy thêm (offline) | Giải thích lại khái niệm theo 3 bước: định nghĩa → ví dụ → kiểm tra | Structured pedagogy | Yes — đây chính xác là pattern AI Tutor implement |
 
 ## 5. Evidence → Insight
 
 ```text
 Evidence nổi bật nhất:
-- Học viên nhận thông tin từ 3-4 kênh khác nhau sau mỗi buổi học.
-- Không có kênh nào là "single source of truth" — deadline ở email, nội dung ở Discord, tài liệu ở web.
-- Kết quả thực tế: miss deadline, phải hỏi lại bạn, mất thời gian scroll tìm thông tin.
+- Học viên không hỏi trong giờ vì sợ gián đoạn lớp — pain thật, rào cản xã hội.
+- ChatGPT thiếu context khoá học → giải thích không match nội dung đang học.
+- Câu hỏi "nhỏ" không được giải đáp tích lũy → confusion lớn ở bài sau.
 
 Insight:
-Học viên không chỉ cần tóm tắt nội dung học.
+Học viên không chỉ cần "một chỗ hỏi".
 Thật ra họ cần:
-1. Một bản digest tổng hợp từ tất cả kênh sau mỗi buổi — không cần mở nhiều tab.
-2. Action items + deadline rõ ràng — biết ngay hôm nay cần làm gì.
-3. Flag khi thông tin không đầy đủ — biết khi nào cần hỏi thêm thay vì miss.
+1. Một AI biết mình đang học gì (LLM, LangChain, Agents, RAG) — không giải thích lạc đề.
+2. Giải thích có cấu trúc — không phải wall of text: định nghĩa → code → kiểm tra.
+3. Adaptive khi câu hỏi mơ hồ — hỏi lại thay vì đoán sai.
+4. Tùy chọn upload tài liệu buổi học — AI có thêm context bài hôm nay.
 
 Vì pattern từ evidence cho thấy:
-- Có nhiều kênh thông tin nhưng không có aggregation layer
-- Học viên tự làm thủ công (scroll, đọc lại) — tốn thời gian và dễ miss
-- AI có thể thay thế bước aggregate + extract này trong vài giây
+- Rào cản là xã hội (sợ gián đoạn), không phải kỹ thuật → giải pháp là riêng tư, instant
+- Vấn đề của ChatGPT là thiếu context, không phải thiếu năng lực → inject curriculum context vào prompt
+- Structured output quan trọng: học viên cần code example, không chỉ text giải thích
 
 Opportunity:
 AI có thể giúp bằng cách:
-- Nhận paste content từ Email + Discord + Web cùng lúc
-- Extract: key concepts + action items + deadlines
-- Flag khi deadline mơ hồ thay vì tự bịa ngày
-- Cho phép user bổ sung thông tin thiếu và re-generate
+- Nhận câu hỏi tự do hoặc tài liệu upload từ học viên
+- Trả lời có cấu trúc cố định: 1. Giải thích ngắn → 2. Code → 3. Câu hỏi kiểm tra hiểu
+- Hỏi lại khi câu hỏi mơ hồ: "Bạn đang bị stuck ở điểm nào cụ thể?"
+- Dùng context tài liệu buổi học nếu học viên upload
 ```
 
 ## 6. Evidence đổi SPEC như thế nào?
@@ -66,23 +67,24 @@ AI có thể giúp bằng cách:
 - [x] Đổi pain statement.
 - [x] Đổi build slice.
 - [x] Đổi Auto/Aug decision.
-- [x] Đổi 4 paths.
+- [x] Đổi 3 paths (happy, adaptive, file upload).
 - [x] Đổi failure mode.
 - [x] Đổi owner/test plan.
 
 ```text
 Trước evidence, nhóm định:
-- Làm "AI tóm tắt bài học" generic (1 nguồn, 1 lượt summarize)
-- User: "Học viên muốn ôn bài"
-- Không xử lý được case deadline không rõ hoặc thông tin thiếu
+- Làm Session Digest Bot — tổng hợp thông tin cross-channel (Email, Discord, Web)
+- User: "Học viên sau buổi học bị ngợp bởi thông tin rải rác"
+- Flow: paste content → AI extract digest → correction
 
 Sau evidence, nhóm đổi thành:
-- Làm "Session Digest Bot" — tổng hợp cross-channel (Email + Discord + Web)
-- User: "Học viên sau buổi live session bị ngợp bởi thông tin rải rác"
-- Có 4 paths: happy (digest sạch), low-confidence (flag deadline mơ hồ), failure (parse error fallback), correction (user bổ sung → re-generate)
+- Làm AI Tutor — trợ lý học tập real-time trong và sau lớp học
+- User: "Học viên đang học live bị stuck ở khái niệm, không có chỗ hỏi phù hợp"
+- Flow: gõ câu hỏi (hoặc upload file) → AI giải thích có cấu trúc → follow-up chat
+- Có 3 paths: happy (câu hỏi rõ), adaptive (câu hỏi mơ hồ → AI hỏi lại), file upload
 
 Lý do:
-- Self-use + phỏng vấn bạn cùng lớp cho thấy pain thật: miss deadline vì multi-channel.
-- Tóm tắt 1 nguồn không đủ — cần merge nhiều nguồn mới giải quyết được root cause.
-- Failure path quan trọng: AI không được tự bịa deadline → phải flag và hỏi lại.
+- Self-use + phỏng vấn bạn cùng lớp cho thấy pain thật: không hiểu nhưng không có chỗ hỏi.
+- Digest flow giải quyết problem khác (information overload sau buổi học), không phải real-time confusion.
+- AI Tutor giải đúng root cause: thiếu context-aware explanation ngay lúc học.
 ```

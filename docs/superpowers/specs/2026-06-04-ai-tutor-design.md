@@ -167,6 +167,32 @@ TXT đọc bằng built-in Python, không cần thêm package.
 
 ---
 
+## 14. LLM Provider (thực tế triển khai)
+
+Cấu hình qua `.env` — không hardcode trong code:
+
+| Biến | Giá trị mặc định | Ghi chú |
+|---|---|---|
+| `CUSTOM_LLM_KEY` | Groq API key | Free tier đủ dùng |
+| `CUSTOM_LLM_URL` | `https://api.groq.com/openai/v1` | OpenAI-compatible |
+| `CUSTOM_LLM_MODEL` | `llama-3.3-70b-versatile` | ~1-2s response time |
+
+Ban đầu dùng Ollama `qwen3.5:9b` local nhưng chạy chủ yếu trên CPU (~400s/request). Chuyển sang Groq giải quyết hoàn toàn vấn đề tốc độ.
+
+---
+
+## 15. Testing Results (thực tế)
+
+3 paths đã test end-to-end:
+
+| Path | Input | Expected | Kết quả |
+|---|---|---|---|
+| Happy path | "LangChain là gì?" | 3-phần có structured answer | ✅ Pass |
+| Adaptive | "Tôi không hiểu" | AI hỏi lại "stuck ở đâu?" | ✅ Pass |
+| File upload | Upload `.txt` → hỏi về nội dung | AI dùng file context | ✅ Pass |
+
+---
+
 ## 13. Out of Scope
 
 - RAG / vector store / embeddings

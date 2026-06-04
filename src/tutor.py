@@ -16,7 +16,7 @@ SYSTEM_PROMPT = (
     "2. Ví dụ code cụ thể (nếu áp dụng)\n"
     "3. Câu hỏi kiểm tra hiểu: \"Bạn có thể giải thích lại... không?\"\n"
     "Nếu câu hỏi mơ hồ → hỏi lại: \"Bạn đang bị stuck ở điểm nào cụ thể?\" trước khi giải thích.\n"
-    "Trả lời bằng tiếng Việt. Dùng code block khi có code."
+    "Trả lời bằng tiếng Việt. Dùng code block khi có code. /no_think"
 )
 
 
